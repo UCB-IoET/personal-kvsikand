@@ -16,13 +16,13 @@ Pong.btn3Listener=nil
 
 updateButtonPresses=function()
         btnClicks = btnClicks + 1
-        print(btnClicks)
+        --print(btnClicks)
         if(btnClicks % 3 == 0) then
                 duration = (duration * 2)/3  --crashes if duration is equal to 0 
-                storm.os.cancel(gameHandle)
+                storm.os.cancel(Pong.gameHandle)
                 Pong.gameHandle = storm.os.invokePeriodically(duration*storm.os.MILLISECOND, updateGame)
         end 
-        print(duration)
+        --print(duration)
 end
 
 pressedButton = function(LEDLoc)
@@ -40,6 +40,7 @@ updateGame = function()
 	ballLoc = ballLoc + ballDir
 	if(ballLoc < 0 or ballLoc > 3) then
 		endGame()
+		--print('setting listener')
 		shield.Button.when(2, storm.io.RISING, startGame)
 		return
 	end
@@ -51,6 +52,7 @@ startGame = function()
 	ballDir=-1 -- "ball" initially moves to direction of D1 
 	duration=1000
 	shield.LED.start() --sets LED pins as outputs. 
+	print('starting game')
 	Pong.btn3Listener = shield.Button.whenever(3,storm.io.FALLING, function() pressedButton(3) end);
 	Pong.btn1Listener = shield.Button.whenever(1,storm.io.FALLING, function() pressedButton(0) end);
 	Pong.gameHandle = storm.os.invokePeriodically(duration*storm.os.MILLISECOND, updateGame)
@@ -58,18 +60,24 @@ end
 
 endGame = function()
         if(Pong.gameHandle ~= nil) then
-        	shield.Buzz.go(0)
+		print('ending game\n');
+        	shield.Buzz.go(5)
         	storm.os.invokeLater(500*storm.os.MILLISECOND,shield.Buzz.stop)
 		storm.os.cancel(Pong.gameHandle)
         	Pong.gameHandle = nil
+		--print('cancelled game\n');
 	end
 	if(Pong.btn1Listener ~= nil) then
-        	storm.os.cancel(Pong.btn1Listener)
+		--print("cancelling listener 1")
+        	storm.io.cancel_watch(Pong.btn1Listener)
         	Pong.btn1Listener = nil
+		--print("cancelled listener 1")
 	end
-	if(Pong.btn2Listener ~= nil) then
-        	storm.os.cancel(Pong.btn3Listener)
+	if(Pong.btn3Listener ~= nil) then
+		--print("cancelling listener 3")
+        	storm.io.cancel_watch(Pong.btn3Listener)
         	Pong.btn3Listener = nil
+		--print("cancelled listener 3") 
 	end
 end
 --Game starts when button 2 is pressed. 
@@ -77,5 +85,3 @@ shield.Button.start();
 shield.Button.when(2, storm.io.RISING, startGame)
 
 cord.enter_loop()
-
-

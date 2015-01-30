@@ -62,17 +62,29 @@ end
 local Buzz = {}
 
 Buzz.pin = "D6"
+Buzz.running = false
 
 Buzz.go = function(delay)
 	delay = delay or 0
 	storm.io.set_mode(storm.io.OUTPUT,storm.io[Buzz.pin])
-	storm.io.set(1,storm.io[Buzz.pin]);
-	
-	--return storm.os.invokeLater(delay*storm.os.MILLISECOND, function() storm.io.set(1, storm.io[Buzz.pin]) end)
+	Buzz.running = true
+	cord.new(function() 
+		while(Buzz.running ~= false) do
+			--delta waveform
+			storm.io.set(1,storm.io[Buzz.pin])
+			storm.io.set(0,storm.io[Buzz.pin])
+			if(delay > 0) then
+				cord.await(storm.os.invokeLater,delay*storm.os.MILLISECOND)
+			else 
+				cord.yield()
+			end
+
+		end
+	end)
 end
 
 Buzz.stop = function()
-	storm.io.set(0, storm.io[Buzz.pin])
+	Buzz.running = false
 end
 
 ----------------------------------------------
