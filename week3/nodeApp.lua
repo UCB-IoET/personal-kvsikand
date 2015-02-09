@@ -11,7 +11,8 @@ print("ip addr", ipaddr)
 print("node id", storm.os.nodeid())
 
 
-node = Node:new(1525,1526,1000)
+node = Node:new("jackofAllTrades")
+node:addService("kavansService","Name of my service","Kavans service description")
 
 -- enable a shell
 sh = require "stormsh"
