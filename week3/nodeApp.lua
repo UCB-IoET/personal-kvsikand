@@ -1,7 +1,7 @@
 --[[
 	implementation of being a node with discovery and services
 --]]
-node = require "node"
+Node = require "node"
 require "cord" -- scheduler / fiber library
 
 
@@ -10,9 +10,8 @@ print("")
 print("ip addr", ipaddr)
 print("node id", storm.os.nodeid())
 
-node.announceListener()			-- every node runs the announcement protocol
 
-node.invokeListener()			-- every node runs the invocation protocol
+node = Node:new(1525,1526,1000)
 
 -- enable a shell
 sh = require "stormsh"
