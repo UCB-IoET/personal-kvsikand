@@ -1,7 +1,7 @@
 --[[
 	implementation of being a node with discovery and services
 --]]
-require "node"
+node = require "node"
 require "cord" -- scheduler / fiber library
 
 
