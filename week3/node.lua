@@ -8,6 +8,7 @@ local node = {}
 
 node.announcePort = 1525
 node.invokePort = 1526
+node.beaconingRate = 100
 
 node.announceListener = function()
 	print("starting to listen for announcements")
@@ -15,6 +16,14 @@ node.announceListener = function()
 		function(payload, from, port)
 			print (string.format("announcement from %s port %d: %s",from,port,payload))
 		end)
+end
+
+node.announce = function()
+	--code to actually anounce yourself
+end
+
+node.announceLoop = function()
+	return storm.os.invokePeriodically(node.beaconingRate*storm.os.MILLISECOND, node.announce)
 end
 
 node.invokeListener = function() 
