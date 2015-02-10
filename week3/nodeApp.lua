@@ -12,8 +12,18 @@ print("node id", storm.os.nodeid())
 
 
 node = Node:new("jackofAllTrades")
-node:addService("setLight","setBool","Turn on a light");
-node:addService("printOut","setString","Print to console");
+node:addService("setLight","setBool","Turn on a light", setLight);
+node:addService("printOut","setString","Print to console", print);
+
+setLight = function(onoff)
+	local str = ""
+	if onoff then
+		str = "on"
+	else
+		str = "off"
+	end
+	print("Light is turned " .. str)
+end
 
 printToNeighbor = function(string)
 	local services = node:getNeighborServices()

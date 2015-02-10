@@ -26,7 +26,7 @@ function Node:announceListener()
 	print(string.format("starting to listen for announcements. Port:%d", self.announcePort))
 	self.announceSocket = storm.net.udpsocket(self.announcePort, 
 		function(payload, from, port)
-			print (string.format("announcement from %s port %d: %s",from,port,payload))
+			-- print (string.format("announcement from %s port %d: %s",from,port,payload))
 			self:addNeighbor(storm.mp.unpack(payload), from)
 		end)
 end
@@ -45,13 +45,9 @@ function Node:invokeListener()
 	self.invokeSocket = storm.net.udpsocket(self.invokePort, 
 		function(payload, from, port)
 			cord.new(function()
-				print (string.format("invoke from %s port %d: %s",from,port,payload))
+				-- print (string.format("invoke from %s port %d: %s",from,port,payload))
 				local cmd = storm.mp.unpack(payload)
-				cmd[1]unpack(cmd[2]) do
-					cmdStr = cmdStr .. "," .. item
-				end
-				cmdStr = cmdStr .. ")"
-				loadstring(cmdStr)
+				self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
 			end)
 		end)
 end
