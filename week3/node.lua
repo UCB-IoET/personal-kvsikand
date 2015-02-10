@@ -47,7 +47,6 @@ function Node:invokeListener()
 			cord.new(function()
 				-- print (string.format("invoke from %s port %d: %s",from,port,payload))
 				local cmd = storm.mp.unpack(payload)
-<<<<<<< HEAD
 				if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
 					local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
 					storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
@@ -55,10 +54,6 @@ function Node:invokeListener()
 					print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
 					storm.net.sendto(self.invokeSocket, storm.mp.pack({"Service Error"}), from, port)
 				end
-=======
-				local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
-				storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
->>>>>>> 5ba5c69ad74495472528e6f40aa706936da2e724
 			end)
 		end)
 end
