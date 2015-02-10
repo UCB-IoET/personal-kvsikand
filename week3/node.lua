@@ -26,7 +26,7 @@ function Node:announceListener()
 	print(string.format("starting to listen for announcements. Port:%d", self.announcePort))
 	self.announceSocket = storm.net.udpsocket(self.announcePort, 
 		function(payload, from, port)
-			-- print (string.format("announcement from %s port %d: %s",from,port,payload))
+			--print (string.format("announcement from %s port %d: %s",from,port,payload))
 			self:addNeighbor(storm.mp.unpack(payload), from)
 		end)
 end
@@ -68,10 +68,11 @@ end
 
 --neighbor-related stuff
 function Node:invokeNeighborService(name, ip, ...)
-	local inv_manifest = storm.array.create(2,storm.array.UINT8)
+	local inv_manifest = {}
+	local args = {...}
 	local neighborEntry = self._neighborTable[name][ip]
-	inv_manifest.set(1,name)
-	inv_manifest.set(2,args)
+	inv_manifest[1] = name
+	inv_manifest[2] = args
 	storm.net.sendto(self.invokeSocket, storm.mp.pack(inv_manifest),ip,self.invokePort)
 end
 
