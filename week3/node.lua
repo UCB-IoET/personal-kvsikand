@@ -41,9 +41,17 @@ end
 
 function Node:invokeListener() 
 	print("starting to listen for invocations")
-	invokeSocket = storm.net.udpsocket(self.invokePort, 
+	self.invokeSocket = storm.net.udpsocket(self.invokePort, 
 		function(payload, from, port)
-			print (string.format("invoke from %s port %d: %s",from,port,payload))
+			cord.new(function()
+				print (string.format("invoke from %s port %d: %s",from,port,payload))
+				local cmd = storm.mp.unpack(payload)
+				cmd[1]unpack(cmd[2]) do
+					cmdStr = cmdStr .. "," .. item
+				end
+				cmdStr = cmdStr .. ")"
+				loadstring(cmdStr)
+			end)
 		end)
 end
 
