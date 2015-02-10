@@ -47,8 +47,12 @@ function Node:invokeListener()
 			cord.new(function()
 				-- print (string.format("invoke from %s port %d: %s",from,port,payload))
 				local cmd = storm.mp.unpack(payload)
-				local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
-				storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
+				if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
+					local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
+					storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
+				else
+					self:processInvokationResponse(cmd)
+				end
 			end)
 		end)
 end
@@ -58,9 +62,9 @@ function Node:invokeLocalService(name, ...)
 	return self._localServicesToFunctions[name](args)
 end
 
-function Node:addService(name, s, desc, func)
+function Node:addService(name, s, desc, funcName)
 	self._serviceTable[name] = {s = s, desc = desc}
-	self._localServicesToFunctions[name] = func
+	self._localServicesToFunctions[name] = funcName
 end
 
 function Node:getServiceTable()
@@ -68,6 +72,12 @@ function Node:getServiceTable()
 end
 
 --neighbor-related stuff
+function Node:processInvokationResponse(response)
+	--do nothing for now
+	print("Got Response:")
+	print(response)
+end
+
 function Node:invokeNeighborService(name, ip, ...)
 	local inv_manifest = {}
 	local args = {...}
@@ -77,8 +87,14 @@ function Node:invokeNeighborService(name, ip, ...)
 	storm.net.sendto(self.invokeSocket, storm.mp.pack(inv_manifest),ip,self.invokePort)
 end
 
-function Node:getNeighborServices()
-	return self._neighborTable
+function Node:getNeighborServiceNames()
+	local names = {}
+	local n = 1
+	for k, v in pairs(self._neighborTable) do
+		names[n] = k
+		n = n + 1
+	end
+	return names
 end
 
 function Node:getNeighborsForService(name)
