@@ -55,9 +55,6 @@ node:addService("echoTwo","add","Echo back a pair of numbers", echoTwo)
 node:addService("addition","add","Add two numbers", addition)
 node:addService("printOut","setString","Print to console", print)
 
-
-
-
 printToNeighbor = function(string)
 	local neighbors = node:getNeighborsForService("printOut")
 	for k,v in pairs(neighbors) do
