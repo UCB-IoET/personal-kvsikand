@@ -14,6 +14,16 @@ print("node id", storm.os.nodeid())
 node = Node:new("jackofAllTrades")
 node:addService("setLight","setBool","Turn on a light", setLight);
 node:addService("printOut","setString","Print to console", print);
+node:addService("echoTwo","add","Echo back a pair of numbers", echoTwo);
+node:addService("addition","add","Add two numbers", addition);
+
+echoTwo = function(a, b)
+	return a, b
+end
+
+addition = function(a, b)
+	return a + b
+end
 
 setLight = function(onoff)
 	local str = ""
@@ -23,6 +33,22 @@ setLight = function(onoff)
 		str = "off"
 	end
 	print("Light is turned " .. str)
+end
+
+addRemote = function(a, b)
+	local services = node:getNeighborServices()
+	local neighbors = node:getNeighborsForService("addition")
+	for k,v in pairs(neighbors) do
+		node:invokeNeighborService("addition", v, a, b)
+	end
+end
+
+echoTwo = function(a, b)
+	local services = node:getNeighborServices()
+	local neighbors = node:getNeighborsForService("echoTwo")
+	for k,v in pairs(neighbors) do
+		node:invokeNeighborService("echoTwo", v, a, b)
+	end
 end
 
 printToNeighbor = function(string)
