@@ -4,7 +4,7 @@
 require "storm"
 require "cord" -- scheduler / fiber library
 require "string"
-
+require "math"
 local Node = {}
 
 function Node:new(node_id, announcePort, invokePort, beaconingRate) 
@@ -47,6 +47,7 @@ function Node:invokeListener()
 			cord.new(function()
 				-- print (string.format("invoke from %s port %d: %s",from,port,payload))
 				local cmd = storm.mp.unpack(payload)
+<<<<<<< HEAD
 				if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
 					local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
 					storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
@@ -54,6 +55,10 @@ function Node:invokeListener()
 					print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
 					storm.net.sendto(self.invokeSocket, storm.mp.pack({"Service Error"}), from, port)
 				end
+=======
+				local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
+				storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
+>>>>>>> 5ba5c69ad74495472528e6f40aa706936da2e724
 			end)
 		end)
 end
@@ -72,20 +77,29 @@ function Node:getServiceTable()
 	return self._serviceTable
 end
 
---neighbor-related stuff
-function Node:processInvokationResponse(response)
-	--do nothing for now
-	print("Got Response:")
-	print(response)
-end
-
+--must be run in a new thread
 function Node:invokeNeighborService(name, ip, ...)
 	local inv_manifest = {}
 	local args = {...}
 	local neighborEntry = self._neighborTable[name][ip]
 	inv_manifest[1] = name
 	inv_manifest[2] = args
-	storm.net.sendto(self.invokeSocket, storm.mp.pack(inv_manifest),ip,self.invokePort)
+	local response = nil;
+	local invSock = storm.net.udpsocket(math.random(1027,4000),
+		function(payload, from, port)
+			response = storm.mp.unpack(payload)
+		end) 
+	storm.net.sendto(invSock, storm.mp.pack(inv_manifest),ip,self.invokePort)
+	for iter = 1,20 do
+		cord.await(storm.os.invokeLater, 100*storm.os.MILLISECOND)
+		if(response ~= nil) then
+			storm.net.close(invSock)
+			return response
+		end
+	end
+	storm.net.close(invSock)
+	print("invokation timeout")
+	return nil
 end
 
 function Node:getNeighborServiceNames()

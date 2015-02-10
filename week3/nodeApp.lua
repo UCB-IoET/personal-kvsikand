@@ -30,14 +30,22 @@ end
 addRemote = function(a, b)
 	local neighbors = node:getNeighborsForService("addition")
 	for k,v in pairs(neighbors) do
-		return node:invokeNeighborService("addition", v, a, b)
+		cord.new( function ()
+			resp = node:invokeNeighborService("addition", v, a, b)
+			for k,v in pairs(resp) do print(k .. v) end
+		end)
 	end
 end
 
 echoTwo = function(a, b)
 	local neighbors = node:getNeighborsForService("echoTwo")
 	for k,v in pairs(neighbors) do
-		node:invokeNeighborService("echoTwo", v, a, b)
+		cord.new( function ()
+			resp = node:invokeNeighborService("echoTwo", v, a, b)
+			if(resp) then
+				for k,v in pairs(resp) do print(k .. v) end
+			end
+		end)	
 	end
 end
 
@@ -47,13 +55,10 @@ node:addService("echoTwo","add","Echo back a pair of numbers", echoTwo)
 node:addService("addition","add","Add two numbers", addition)
 node:addService("printOut","setString","Print to console", print)
 
-
-
-
 printToNeighbor = function(string)
 	local neighbors = node:getNeighborsForService("printOut")
 	for k,v in pairs(neighbors) do
-		node:invokeNeighborService("printOut", v, string)
+		cord.new( function () node:invokeNeighborService("printOut", string) end)
 	end
 end
 
