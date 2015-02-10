@@ -7,12 +7,12 @@ require "string"
 
 local Node = {}
 
-
 function Node:new(node_id, announcePort, invokePort, beaconingRate) 
 	obj = { announcePort = announcePort or 1525,
 			invokePort = invokePort or 1526,
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
+			_localServicesToFunctions = {},
 			_neighborTable = {} }
 	setmetatable(obj, self)
 	self.__index = self
@@ -39,6 +39,7 @@ function Node:announceLoop()
 	end)
 end
 
+
 function Node:invokeListener() 
 	print("starting to listen for invocations")
 	self.invokeSocket = storm.net.udpsocket(self.invokePort, 
@@ -55,12 +56,44 @@ function Node:invokeListener()
 		end)
 end
 
-function Node:addService(name, s, desc)
+--local Stuff
+function Node:invokeLocalService(name, ...)
+	return self._localServicesToFunctions[name](args)
+end
+
+function Node:addService(name, s, desc, func)
 	self._serviceTable[name] = {s = s, desc = desc}
+	self._localServicesToFunctions[name] = func
 end
 
 function Node:getServiceTable()
 	return self._serviceTable
+end
+
+--neighbor-related stuff
+function Node:invokeNeighborService(name, ip, ...)
+	local inv_manifest = storm.array.create(2,storm.array.UINT8)
+	local neighborEntry = self._neighborTable[name][ip]
+	inv_manifest.set(1,name)
+	inv_manifest.set(2,args)
+	storm.net.sendto(self.invokeSocket, storm.mp.pack(inv_manifest),ip,self.invokePort)
+end
+
+function Node:getNeighborServices()
+	return self._neighborTable
+end
+
+function Node:getNeighborsForService(name)
+	if not self._neighborTable[name] then
+		return {}
+	end
+	local ips = {}
+	local n = 1
+	for k, v in pairs(self._neighborTable[name]) do
+		ips[n] = k
+		n = n + 1
+	end
+	return ips
 end
 
 function Node:addNeighbor(announcementTable, ipaddr)

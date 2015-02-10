@@ -12,7 +12,16 @@ print("node id", storm.os.nodeid())
 
 
 node = Node:new("jackofAllTrades")
-node:addService("kavansService","Name of my service","Kavans service description")
+node:addService("setLight","setBool","Turn on a light");
+node:addService("printOut","setString","Print to console");
+
+printToNeighbor = function(string)
+	local services = node:getNeighborServices()
+	local neighbors = node:getNeighborsForService("printOut")
+	for k,v in pairs(neighbors) do
+		node:invokeNeighborService("printOut", v, string)
+	end
+end
 
 -- enable a shell
 sh = require "stormsh"
