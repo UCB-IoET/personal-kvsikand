@@ -51,7 +51,8 @@ function Node:invokeListener()
 					local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
 					storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
 				else
-					self:processInvokationResponse(cmd)
+					print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
+					storm.net.sendto(self.invokeSocket, storm.mp.pack({"Service Error"}), from, port)
 				end
 			end)
 		end)
