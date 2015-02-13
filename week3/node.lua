@@ -13,7 +13,7 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
 			_localServicesToFunctions = {},
-			_neighborTable = {} }
+			_remoteServiceTable = {} }
 	setmetatable(obj, self)
 	self.__index = self
 	obj:announceListener()
@@ -76,7 +76,7 @@ end
 function Node:invokeNeighborService(name, ip, ...)
 	local inv_manifest = {}
 	local args = {...}
-	local neighborEntry = self._neighborTable[name][ip]
+	local neighborEntry = self._remoteServiceTable[name][ip]
 	inv_manifest[1] = name
 	inv_manifest[2] = args
 	local response = nil;
@@ -97,10 +97,10 @@ function Node:invokeNeighborService(name, ip, ...)
 	return nil
 end
 
-function Node:getNeighborServiceNames()
+function Node:getRemoteServiceNames()
 	local names = {}
 	local n = 1
-	for k, v in pairs(self._neighborTable) do
+	for k, v in pairs(self._remoteServiceTable) do
 		names[n] = k
 		n = n + 1
 	end
@@ -108,12 +108,12 @@ function Node:getNeighborServiceNames()
 end
 
 function Node:getNeighborsForService(name)
-	if not self._neighborTable[name] then
+	if not self._remoteServiceTable[name] then
 		return {}
 	end
 	local ips = {}
 	local n = 1
-	for k, v in pairs(self._neighborTable[name]) do
+	for k, v in pairs(self._remoteServiceTable[name]) do
 		ips[n] = k
 		n = n + 1
 	end
@@ -124,11 +124,11 @@ function Node:addNeighbor(announcementTable, ipaddr)
 	--local timeDelta = storm.os.now(storm.os.SHIFT_16) - announcementTable.t
 	for k,v in pairs(announcementTable) do
 		if (k ~= "id" and k ~= "t")  then
-			if (self._neighborTable[k] == nil) then
-				self._neighborTable[k] =  {}
+			if (self._remoteServiceTable[k] == nil) then
+				self._remoteServiceTable[k] =  {}
 			end
 			v.id = announcementTable.id
-			self._neighborTable[k][ipaddr] = v
+			self._remoteServiceTable[k][ipaddr] = v
 		end
 	end
 end
