@@ -13,7 +13,7 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
 			_localServicesToFunctions = {},
-			_remoteServiceTable = {} 
+			_remoteServiceTable = {},
 	                _scheduledInvocations = {}}
 	setmetatable(obj, self)
 	self.__index = self
@@ -45,17 +45,17 @@ function Node:invokeListener()
 	print("starting to listen for invocations")
 	self.invokeSocket = storm.net.udpsocket(self.invokePort, 
 		function(payload, from, port)
-			cord.new(function()
-				-- print (string.format("invoke from %s port %d: %s",from,port,payload))
-				local cmd = storm.mp.unpack(payload)
-				if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
-					local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
-					storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
-				else
-					print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
-					storm.net.sendto(self.invokeSocket, storm.mp.pack({"Service Error"}), from, port)
-				end
-			end)
+cord.new(function()
+	    -- print (string.format("invoke from %s port %d: %s",from,port,payload))
+	    local cmd = storm.mp.unpack(payload)
+	    if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
+	       local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
+	       storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
+	    elseif(cmd[1] and self._specialServices[cmd[1]]) then
+	       print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
+	       storm.net.sendto(self.invokeSocket, storm.mp.pack({"Service Error"}), from, port)
+	    end
+	 end)
 		end)
 end
 
