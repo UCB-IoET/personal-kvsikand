@@ -133,6 +133,27 @@ function Node:addNeighbor(announcementTable, ipaddr)
 	end
 end
 
+function trSetup(ivkid, time, func, args)
+   if _scheduledInvocations[ivkid] ~= nil then
+      _scheduledInvocations[ivkid] =
+	 storm.os.invokeLater(time*storm.os.SHIFT_16, func, unpack(args))
+   end
+   --return the ivkid as an ack.
+   --TODO: how should we be sending the ack?
+   return ivkid
+end
+
+function trAbort(ivkid)
+   if _scheduledInvocations[ivkid] ~= nil then
+      storm.os.cancel(_scheduledInvocations[ivkid])
+	 _scheduledInvocations[ivkid] = nil;
+   end
+   return ivkid
+end
+
+Node:addService("trSetup", "trSetup", "setup a transaction", trSetup);
+Node:addService("trAbort", "trAbort", "setup a transaction", trAbort);
+
 function Node:printTable(level, value)
 	if (type(value) == "table") then
 		level = level or 1
