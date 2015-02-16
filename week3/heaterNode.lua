@@ -21,9 +21,9 @@ getAverageTemperature = function()
 	end
 
 
-	for k,v in pairs(neighbors) do
+	for _,ip in pairs(neighbors) do
 		cord.new( function ()
-			resp = node:invokeNeighborService("getTemperature", v)
+			resp = node:invokeNeighborService("getTemperature", ip)
 			if(!Node.isError(resp)) then
 				readings:set(n,tonumber(resp))
 				n = n + 1

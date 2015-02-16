@@ -13,7 +13,8 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
 			_localServicesToFunctions = {},
-			_remoteServiceTable = {} }
+			_remoteServiceTable = {} 
+	                _scheduledInvocations = {}}
 	setmetatable(obj, self)
 	self.__index = self
 	obj:announceListener()
@@ -104,8 +105,8 @@ end
 function Node:getRemoteServiceNames()
 	local names = {}
 	local n = 1
-	for k, v in pairs(self._remoteServiceTable) do
-		names[n] = k
+	for name, ips in pairs(self._remoteServiceTable) do
+		names[n] = name
 		n = n + 1
 	end
 	return names
@@ -117,8 +118,8 @@ function Node:getNeighborsForService(name)
 	end
 	local ips = {}
 	local n = 1
-	for k, v in pairs(self._remoteServiceTable[name]) do
-		ips[n] = k
+	for ip, tbl in pairs(self._remoteServiceTable[name]) do
+		ips[n] = ip
 		n = n + 1
 	end
 	return ips
