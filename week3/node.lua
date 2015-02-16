@@ -97,6 +97,10 @@ function Node:invokeNeighborService(name, ip, ...)
 	return nil
 end
 
+function Node.isError(v)
+   return v == nil;
+end
+
 function Node:getRemoteServiceNames()
 	local names = {}
 	local n = 1
