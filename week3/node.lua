@@ -21,6 +21,9 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 	obj:announceListener()
 	obj:announceLoop()
 	obj:invokeListener()
+	obj:addService("trSetup", "", "setup a transaction", trSetup);
+	obj:addService("trAbort", "", "setup a transaction", trAbort);
+	obj:addService("getNow",  "getNumber", "get the local time", getNow);
 	return obj
 end
 
@@ -159,12 +162,6 @@ end
 
 function getnow()
    return storm.os.getNow(storm.os.SHIFT_16)
-end
-
-function Node:initServices()
-   self.addService("trSetup", "", "setup a transaction", trSetup);
-   self.addService("trAbort", "", "setup a transaction", trAbort);
-   self.addService("getNow",  "getNumber", "get the local time", getNow);
 end
 
 function Node:printTable(level, value)
