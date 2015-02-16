@@ -151,8 +151,13 @@ function trAbort(ivkid)
    return ivkid
 end
 
+function getnow()
+   return storm.os.getNow(storm.os.SHIFT_16)
+end
+
 Node:addService("trSetup", "trSetup", "setup a transaction", trSetup);
 Node:addService("trAbort", "trAbort", "setup a transaction", trAbort);
+Node:addService("getNow",  "getNumber", "get the local time", getNow);
 
 function Node:printTable(level, value)
 	if (type(value) == "table") then
