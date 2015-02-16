@@ -5,6 +5,7 @@ require "storm"
 require "cord" -- scheduler / fiber library
 require "string"
 require "math"
+
 local Node = {}
 
 function Node:new(node_id, announcePort, invokePort, beaconingRate) 
@@ -98,7 +99,7 @@ function Node:invokeNeighborService(name, ip, ...)
 	return nil
 end
 
-function Node.isError(v)
+function Node:isError(v)
    return v == nil;
 end
 
@@ -160,9 +161,11 @@ function getnow()
    return storm.os.getNow(storm.os.SHIFT_16)
 end
 
-Node:addService("trSetup", "", "setup a transaction", trSetup);
-Node:addService("trAbort", "", "setup a transaction", trAbort);
-Node:addService("getNow",  "getNumber", "get the local time", getNow);
+function Node:initServices()
+   self.addService("trSetup", "", "setup a transaction", trSetup);
+   self.addService("trAbort", "", "setup a transaction", trAbort);
+   self.addService("getNow",  "getNumber", "get the local time", getNow);
+end
 
 function Node:printTable(level, value)
 	if (type(value) == "table") then

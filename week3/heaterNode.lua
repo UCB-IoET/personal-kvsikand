@@ -11,6 +11,8 @@ node = Node:new("Heater interfaced device")
 
 local heaterPin = storm.io.D4
 local heaterIsOn = 0
+
+storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
 
 getAverageTemperature = function()
