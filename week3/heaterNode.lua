@@ -5,27 +5,31 @@ Node = require "node"
 Temp = require "temp"
 require "cord" -- scheduler / fiber library
 require "table"
+--require "math"
 
 ipaddr = storm.os.getipaddr()
 
 node = Node:new("Heater interfaced device")
 temp = Temp:new()
 local heaterPin = storm.io.D4
-local heaterIsOn = 0
+local heaterIsOn = false
+local TEMP_DELTA = 1
+local targetTemp = nil
+local tempMonitorHandle = nil
 
 storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
 
-initTempSensor = function()
+function initTempSensor()
 	return temp:init()
 end
 
-getTemperature = function()
+function getTemperature()
 	return temp:getTemp()
 end
 
-getAverageTemperature = function()
-
+function getAverageTemperature()
+	--return math.random(20)
 	local neighbors = node:getNeighborsForService("getTemperature")
 	local readings = storm.array.create(table.getn(neighbors)) --todo: confirm that this works
 
@@ -63,14 +67,42 @@ function setHeater(state)
    end
 end
 
-function setTargetTemp(temp)
-   return nil --TODO
+function monitorTemperature()
+	local currentTemp = getAverageTemperature()
+	print("temperature: " .. currentTemp)
+	if(targetTemp and currentTemp + TEMP_DELTA < targetTemp) then
+		if heaterIsOn == false then
+			print("turning on heater")
+			heaterOn()
+		end
+	elseif heaterIsOn == true then
+		print("turning off heater")
+		heaterOff()
+	end
+end
+
+
+function setTargetTemp(t)
+	targetTemp = t
+	if not tempMonitorHandle then
+		print("starting monitor")
+		tempMonitorHandle = storm.os.invokePeriodically(10*storm.os.SECOND, monitorTemperature)
+	end
+end
+
+function stopMonitoringTemp()
+	if(tempMonitorHandle) then
+		storm.os.cancel(tempMonitorHandle)
+		tempMonitorHandle = nil
+	end
+	return true
 end
 
 node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
 node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 node:addService("setHeater","setBool","turn heater on/off", setHeater)
-node:addService("setTemp","setNumber","set target temperature", setTargetTemp)
+node:addService("setRoomTemperature","setNumber","set target temperature", setTargetTemp)
+node:addService("stopMonitoringTemperature","getBool","stop monitoring room temperature", stopMonitoringTemp)
 
 -- enable a shell
 sh = require "stormsh"
