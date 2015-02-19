@@ -1,12 +1,15 @@
 REG = require("reg")
 require("storm")
 require("cord")
-TMP006_CONFIG = 0x02
-TMP006_T_AMBIENT = 0x01
-TMP006_MFG_ID = 0xfe
-TMP006_DEVICE_ID = 0xff
 
---Config register values.
+-- Register address --
+TMP006_VOLTAGE = 0x00
+TMP006_LOCAL_TEMP = 0x01
+TMP006_CONFIG = 0x02
+TMP006_MFG_ID = 0xFE
+TMP006_DEVICE_ID = 0xFF
+
+-- Config register values
 TMP006_CFG_RESET    = 0x80
 TMP006_CFG_MODEON   = 0x70
 CFG_1SAMPLE         = 0x00
@@ -20,7 +23,8 @@ TMP006_CFG_DRDY     = 0x80
 local TEMP = {}
 
 function TEMP:new()
-   local obj = {port=storm.i2c.INT, addr = 0x80, 
+   local obj = {port=storm.i2c.INT, 
+                addr = 0x80, 
                 reg=REG:new(storm.i2c.INT, 0x80)}
    setmetatable(obj, self)
    self.__index = self
@@ -30,25 +34,15 @@ end
 
 function TEMP:init()
     --configure the conversion rate (0x02 0x00 = 2 sample/second, 0x04 0x00 = 1 s/s)
-    self.reg:w(TMP006_CONFIG, 0x00 + 0x70 + 0x01, 0x00)
+    self.reg:w_multiple(TMP006_CONFIG, {0x00 + 0x70 + 0x01, 0x00})
     return true
 end
 
 function TEMP:getTemp()
     --Read ambient temperature
-    local addr = storm.array.create(1, storm.array.UINT8)
-    addr:set(1, TMP006_T_AMBIENT)
-    local rv = cord.await(storm.i2c.write,  self.port + self.addr,  storm.i2c.START, addr)
-    if (rv ~= storm.i2c.OK) then
-        print ("ERROR ON I2C: ",rv)
-    end
-    local dat = storm.array.create(2, storm.array.UINT8)
-    rv = cord.await(storm.i2c.read,  self.port + self.addr,  storm.i2c.RSTART + storm.i2c.STOP, dat)
-    if (rv ~= storm.i2c.OK) then
-        print ("ERROR ON I2C: ",rv)
-    end
+    local result = self.reg:r_multiple(TMP006_LOCAL_TEMP, 2)
     --Converting temperature into Celsius (each LSB = 1/32 Deg. Celsius)
-    local temperature = dat:get_as(storm.array.INT16_BE, 0)/32
+    local temperature = bit.rshift(result:get_as(storm.array.INT16_BE, 0), 2) / 32
     return temperature
 end
 
