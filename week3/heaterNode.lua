@@ -2,18 +2,27 @@
 	implementation of being a node with discovery and services
 --]]
 Node = require "node"
+Temp = require "temp"
 require "cord" -- scheduler / fiber library
 require "table"
 
 ipaddr = storm.os.getipaddr()
 
 node = Node:new("Heater interfaced device")
-
+temp = Temp:new()
 local heaterPin = storm.io.D4
 local heaterIsOn = 0
 
 storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
+
+initTempSensor = function()
+	return temp:init()
+end
+
+getTemperature = function()
+	return temp:getTemp()
+end
 
 getAverageTemperature = function()
 
@@ -58,6 +67,8 @@ function setTargetTemp(temp)
    return nil --TODO
 end
 
+node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
+node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 node:addService("setHeater","setBool","turn heater on/off", setHeater)
 node:addService("setTemp","setNumber","set target temperature", setTargetTemp)
 

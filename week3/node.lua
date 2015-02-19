@@ -74,6 +74,8 @@ function Node:getServiceTable()
 	return self._serviceTable
 end
 
+
+--remote stuff
 --must be run in a new thread
 function Node:invokeNeighborService(name, ip, ...)
 	local inv_manifest = {}
@@ -167,19 +169,8 @@ function Node:initServices()
    self.addService("getNow",  "getNumber", "get the local time", getNow);
 end
 
-function Node:printTable(level, value)
-	if (type(value) == "table") then
-		level = level or 1
-		local returnString = "\n"
-		for k,v in pairs(value) do
-			returnString = returnString .. string.format("%s %s : %s\n", string.rep("\t",level), k, self:printTable(v))
-		end
-		return returnString
-	elseif(value ~= nil) then
-		return string.format("%s", value)
-	else
-		return ""
-	end
+function Node.isError(response)
+	return storm.unpack(response) == {"Service Error"};
 end
 
 return Node
