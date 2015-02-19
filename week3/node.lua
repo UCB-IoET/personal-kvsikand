@@ -21,6 +21,9 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 	obj:announceListener()
 	obj:announceLoop()
 	obj:invokeListener()
+	obj:addService("trSetup", "", "setup a transaction", trSetup)
+	obj:addService("trAbort", "", "setup a transaction", trAbort)
+	obj:addService("getNow",  "getNumber", "get the local time", getNow)
 	return obj
 end
 
@@ -83,7 +86,7 @@ function Node:invokeNeighborService(name, ip, ...)
 	local neighborEntry = self._remoteServiceTable[name][ip]
 	inv_manifest[1] = name
 	inv_manifest[2] = args
-	local response = nil;
+	local response = nil
 	local invSock = storm.net.udpsocket(math.random(1027,4000),
 		function(payload, from, port)
 			response = storm.mp.unpack(payload)
@@ -102,7 +105,7 @@ function Node:invokeNeighborService(name, ip, ...)
 end
 
 function Node:isError(v)
-   return v == nil;
+   return v == nil
 end
 
 function Node:getRemoteServiceNames()

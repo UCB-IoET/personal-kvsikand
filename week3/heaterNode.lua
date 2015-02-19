@@ -47,12 +47,12 @@ end
 
 function heaterOn()
    storm.io.set(storm.io.HIGH, heaterPin)
-   heaterIsOn = 1;
+   heaterIsOn = 1
 end
 
 function heaterOff()
    storm.io.set(storm.io.LOW, heaterPin)
-   heaterIsOn = 0;
+   heaterIsOn = 0
 end
 
 function setHeater(state)
