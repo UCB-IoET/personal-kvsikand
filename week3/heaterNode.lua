@@ -1,16 +1,15 @@
 --[[
 	implementation of being a node with discovery and services
 --]]
---Node = require "node"
+Node = require "node"
 Temp = require "temp"
-LCD = require "lcd"
+--LCD = require "lcdlite"
 
 require "cord" -- scheduler / fiber library
 require "table"
 --require "math"
 
---node = Node:new("Heater interfaced device")
-temp = Temp:new()
+node = Node:new("Heater interfaced device")
 
 local heaterPin = storm.io.D4
 local heaterIsOn = false
@@ -23,13 +22,16 @@ storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
 
 function initTempSensor()
+	temp = Temp:new()
 	cord.new(function() 
 		tempInited = temp:init()
-		end)
+	end)
 end
 
 function getTemperature()
-	return temp:getTemp()
+	if(tempInited) then
+		return temp:getTemp()
+	end
 end
 
 function getAverageTemperature()
@@ -97,7 +99,7 @@ function stopMonitoringTemp()
 	return true
 end
 
-function initLCD()
+--[[function initLCD()
 	lcd = LCD:new(storm.i2c.EXT, 0x7c, storm.i2c.EXT, 0xc4)
 	cord.new(function()
 		lcd:init(1, 1)
@@ -111,14 +113,14 @@ function displayTemp()
 		lcd:setCursor(1,0)
 		lcd:writeString(string.format("Temp: %d", currentTemp));
 	end)
-end
+end--]]
 
---[[node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
+node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
 node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 node:addService("setHeater","setBool","turn heater on/off", setHeater)
 node:addService("setRoomTemperature","setNumber","set target temperature", setTargetTemp)
-node:addService("stopMonitoringTemperature","getBool","stop monitoring room temperature", stopMonitoringTemp)
---]]
+node:addService("cancelRoomTemperature","getBool","stop monitoring room temperature", stopMonitoringTemp)
+
 -- enable a shell
 sh = require "stormsh"
 sh.start()
