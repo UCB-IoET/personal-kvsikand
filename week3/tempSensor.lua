@@ -3,11 +3,11 @@ require("storm")
 require("cord")
 
 -- Register address --
-TMP006_VOLTAGE = 0x00
-TMP006_LOCAL_TEMP = 0x01
-TMP006_CONFIG = 0x02
-TMP006_MFG_ID = 0xFE
-TMP006_DEVICE_ID = 0xFF
+local TMP006_VOLTAGE = 0x00
+local TMP006_LOCAL_TEMP = 0x01
+local TMP006_CONFIG = 0x02
+local TMP006_MFG_ID = 0xFE
+local TMP006_DEVICE_ID = 0xFF
 
 -- Config register values
 TMP006_CFG_RESET    = 0x80
