@@ -18,6 +18,7 @@ function initTempSensor()
 	temp = Temp:new()
 	cord.new(function() 
 		tempInited = temp:init()
+		node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 	end)
 end
 
@@ -52,7 +53,6 @@ btn1:whenever("RISING", function() incrementTargetTemp(1) end);
 btn3:whenever("RISING", function() incrementTargetTemp(-1) end);
 
 node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
-node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 -- enable a shell
 sh = require "stormsh"
 sh.start()

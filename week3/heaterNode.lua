@@ -25,6 +25,7 @@ function initTempSensor()
 	temp = Temp:new()
 	cord.new(function() 
 		tempInited = temp:init()
+		node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 	end)
 end
 
@@ -43,7 +44,10 @@ function getAverageTemperature()
 		if not tempInited then
 			node:invokeLocalService("initTempSensor");
 		end
-		readings:append(tonumber(node:invokeLocalService("getTemperature")))
+		temp = node:invokeLocalService("getTemperature");
+		if not node:isError(temp) then
+			readings:append(tonumber(temp))
+		end
 	end
 
 	for _,ip in pairs(neighbors) do
@@ -116,7 +120,6 @@ function displayTemp()
 end--]]
 
 node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
-node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
 node:addService("setHeater","setBool","turn heater on/off", setHeater)
 node:addService("setRoomTemperature","setNumber","set target temperature", setTargetTemp)
 node:addService("cancelRoomTemperature","getBool","stop monitoring room temperature", stopMonitoringTemp)

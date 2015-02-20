@@ -173,7 +173,7 @@ function Node:initServices()
 end
 
 function Node.isError(response)
-	return storm.unpack(response) == {"Service Error"};
+	return response == {"Service Error"};
 end
 
 return Node
