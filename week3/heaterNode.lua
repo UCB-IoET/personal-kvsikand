@@ -38,16 +38,22 @@ end
 function getAverageTemperature()
 	--return math.random(20)
 	local neighbors = node:getNeighborsForService("getTemperature")
-	local readings = storm.array.create(table.getn(neighbors)) --todo: confirm that this works
-
+	local readingCount = table.getn(neighbors)
+	local readings --todo: confirm that this works
+	local localTemp = nil
 	if (node:getServiceTable()["getTemperature"]) then
 		if not tempInited then
 			node:invokeLocalService("initTempSensor");
 		end
-		temp = node:invokeLocalService("getTemperature");
+		local tempLocalTemp = node:invokeLocalService("getTemperature");
 		if not node:isError(temp) then
-			readings:append(tonumber(temp))
+			readingCount = readingCount + 1
+			localTemp = tempLocalTemp
 		end
+	end
+	readings = storm.array.create(readingCount)
+	if(localTemp) then
+		readings:append(tonumber(localTemp))
 	end
 
 	for _,ip in pairs(neighbors) do
@@ -59,7 +65,8 @@ function getAverageTemperature()
 		end)
 	end
 
-	return readings:sum()/n
+	if readingCount == 0 then return -1 end
+	return readings:sum()/readingCount
 end
 
 function setHeater(state)
