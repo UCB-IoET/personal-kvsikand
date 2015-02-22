@@ -9,7 +9,7 @@ require "math"
 local Node = {}
 
 function Node:new(node_id, announcePort, invokePort, beaconingRate) 
-	obj = { announcePort = announcePort or 1525,
+	local obj = { announcePort = announcePort or 1525,
 			invokePort = invokePort or 1526,
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
@@ -164,12 +164,6 @@ end
 
 function getnow()
    return storm.os.getNow(storm.os.SHIFT_16)
-end
-
-function Node:initServices()
-   self.addService("trSetup", "", "setup a transaction", trSetup);
-   self.addService("trAbort", "", "setup a transaction", trAbort);
-   self.addService("getNow",  "getNumber", "get the local time", getNow);
 end
 
 function Node.isError(response)
