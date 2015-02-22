@@ -9,7 +9,7 @@ require "math"
 local Node = {}
 
 function Node:new(node_id, announcePort, invokePort, beaconingRate) 
-	obj = { announcePort = announcePort or 1525,
+	local obj = { announcePort = announcePort or 1525,
 			invokePort = invokePort or 1526,
 			beaconingRate = beaconingRate or 1000,
 			_serviceTable = {id=node_id or "A Really Cool Node"},
