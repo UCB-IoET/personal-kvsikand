@@ -166,12 +166,6 @@ function getnow()
    return storm.os.getNow(storm.os.SHIFT_16)
 end
 
-function Node:initServices()
-   self.addService("trSetup", "", "setup a transaction", trSetup);
-   self.addService("trAbort", "", "setup a transaction", trAbort);
-   self.addService("getNow",  "getNumber", "get the local time", getNow);
-end
-
 function Node.isError(response)
 	return response == {"Service Error"};
 end
