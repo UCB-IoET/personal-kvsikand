@@ -64,12 +64,12 @@ function updateAverageTemperature()
 	end
 
 	for _,ip in pairs(neighbors) do
-		cord.await( function ()
-			resp = node:invokeNeighborService("getTemperature", ip)
-			if not Node.isError(resp) then
-				readings:append(tonumber(resp[1]))
-			end
-		end)
+		resp = node:invokeNeighborService("getTemperature", ip)
+		if not Node.isError(resp) then
+			readings:append(tonumber(resp[1]))
+		else 
+			readingCount = readingCount-1
+		end
 	end
 
 	if readingCount == 0 then return -1 end
