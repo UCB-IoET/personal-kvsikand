@@ -3,16 +3,15 @@
 --]]
 Node = require "node"
 Temp = require "temp"
-Button = require "button"
 --LCD = require "lcdlite"
 
 require "cord" -- scheduler / fiber library
 require "table"
 --require "math"
 
-node = Node:new("Heater Controller")
+node = Node:new("HeaterRemote")
 
-local desiredTemp
+local tempInited = false
 
 function initTempSensor()
 	temp = Temp:new()
@@ -28,31 +27,43 @@ function getTemperature()
 	end
 end
 
-function setTargetTemp(t)
-	targetTemp = t
-	if not tempMonitorHandle then
-		print("starting monitor")
-		tempMonitorHandle = storm.os.invokePeriodically(10*storm.os.SECOND, monitorTemperature)
-	end
+function setRoomTemperature(t)
+	local neighbors = node:getNeighborsForService("getTemperature")
+	cord.new(function()
+		for _,ip in pairs(neighbors) do
+			resp = node:invokeNeighborService("setRoomTemperature",ip,t)
+		end
+	end)
 end
 
-
-function incrementTargetTemp(amt)
-	desiredTemp = desiredTemp + amt
-	ips = node:getNeighborsForService("setRoomTemperature")
-	if(ips ~= {}) then
-		node:invokeNeighborService("setRoomTemperature", ips[1], desiredTemp)
-	end
+function cancelRoomTemperature()
+	local neighbors = node:getNeighborsForService("setRoomTemperature")
+	cord.new(function()
+		for _,ip in pairs(neighbors) do
+			resp = node:invokeNeighborService("cancelRoomTemperature",ip)
+		end
+	end)
 end
 
+--[[function initLCD()
+	lcd = LCD:new(storm.i2c.EXT, 0x7c, storm.i2c.EXT, 0xc4)
+	cord.new(function()
+		lcd:init(1, 1)
+		lcd:setCursor(1,0)
+	 end)
+end
 
-btn1 = Button:new("D1")
-btn3 = Button:new("D3")
+function displayTemp()
+	cord.new(function()
+		local currentTemp = getTemperature();
+		lcd:setCursor(1,0)
+		lcd:writeString(string.format("Temp: %d", currentTemp));
+	end)
+end--]]
 
-btn1:whenever("RISING", function() incrementTargetTemp(1) end);
-btn3:whenever("RISING", function() incrementTargetTemp(-1) end);
+node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
 
 -- enable a shell
-
-initTempSensor()
+sh = require "stormsh"
+sh.start()
 cord.enter_loop() -- start event/sleep loop
