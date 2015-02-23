@@ -37,6 +37,9 @@ function getTemperature()
 end
 
 function getAverageTemperature()
+	if averageTemp == -1 then
+		updateAverageTemperature()
+	end
 	return averageTemp
 end
 
@@ -70,7 +73,7 @@ function updateAverageTemperature()
 	end
 
 	if readingCount == 0 then return -1 end
-	print("COUNT: " .. readingCount)
+
 	averageTemp = readings:sum()/readingCount
 end
 

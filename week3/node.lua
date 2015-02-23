@@ -31,7 +31,6 @@ function Node:announceListener()
 	print(string.format("starting to listen for announcements. Port:%d", self.announcePort))
 	self.announceSocket = storm.net.udpsocket(self.announcePort, 
 		function(payload, from, port)
-			--print (string.format("announcement from %s port %d: %s",from,port,payload))
 			self:addNeighbor(storm.mp.unpack(payload), from)
 		end)
 end
@@ -52,8 +51,9 @@ function Node:invokeListener()
 cord.new(function()
 	    print (string.format("invoke from %s port %d: %s",from,port,payload))
 	    local cmd = storm.mp.unpack(payload)
+
 	    if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
-	       local value = self._localServicesToFunctions[cmd[1]](unpack(cmd[2]))
+	       local value = self.invokeLocalService(cmd[1],unpack(cmd[2]))
 	       storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
 	    else
 	       print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))
@@ -133,8 +133,9 @@ end
 
 function Node:addNeighbor(announcementTable, ipaddr)
 	--local timeDelta = storm.os.now(storm.os.SHIFT_16) - announcementTable.t
-	require "pprint"
-	pptable(announcementTable)
+	if not announcementTable or not announcementTable[id] then -- not a valid announcement
+		return
+	end
 	for k,v in pairs(announcementTable) do
 		if (k ~= "id" and k ~= "t")  then
 			if (self._remoteServiceTable[k] == nil) then
