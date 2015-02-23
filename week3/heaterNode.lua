@@ -13,6 +13,7 @@ node = Node:new("Heater interfaced device")
 
 local heaterPin = storm.io.D4
 local heaterIsOn = false
+local averageTemp = -1
 local TEMP_DELTA = 1
 local tempInited = false
 local targetTemp = nil
@@ -36,7 +37,10 @@ function getTemperature()
 end
 
 function getAverageTemperature()
-	--return math.random(20)
+	return averageTemp
+end
+
+function updateAverageTemperature()
 	local neighbors = node:getNeighborsForService("getTemperature")
 	local readingCount = table.getn(neighbors)
 	local readings --todo: confirm that this works
@@ -66,7 +70,8 @@ function getAverageTemperature()
 	end
 
 	if readingCount == 0 then return -1 end
-	return readings:sum()/readingCount
+	print("COUNT: " .. readingCount)
+	averageTemp = readings:sum()/readingCount
 end
 
 function setHeater(state)
@@ -80,9 +85,9 @@ function setHeater(state)
 end
 
 function monitorTemperature()
-	local currentTemp = getAverageTemperature()
+	updateAverageTemperature()
 	print("temperature: " .. currentTemp)
-	if(targetTemp and currentTemp + TEMP_DELTA < targetTemp) then
+	if(targetTemp and averageTemp + TEMP_DELTA < targetTemp) then
 		if heaterIsOn == false then
 			print("turning on heater")
 			setHeater(1)
@@ -130,6 +135,7 @@ node:addService("initTempSensor","getBool","initialize temp sensor", initTempSen
 node:addService("setHeater","setBool","turn heater on/off", setHeater)
 node:addService("setRoomTemperature","setNumber","set target temperature", setTargetTemp)
 node:addService("cancelRoomTemperature","getBool","stop monitoring room temperature", stopMonitoringTemp)
+node:addService("getAverageTemperature","getNumber","get room temperature", getAverageTemperature)
 
 -- enable a shell
 sh = require "stormsh"
