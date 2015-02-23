@@ -2,7 +2,7 @@
 	implementation of being a node with discovery and services
 --]]
 Node = require "node"
-Temp = require "temp"
+--Temp = require "temp"
 --LCD = require "lcdlite"
 
 require "cord" -- scheduler / fiber library
@@ -64,10 +64,10 @@ function updateAverageTemperature()
 	end
 
 	for _,ip in pairs(neighbors) do
-		cord.new( function ()
+		cord.await( function ()
 			resp = node:invokeNeighborService("getTemperature", ip)
 			if not Node.isError(resp) then
-				readings:append(tonumber(resp))
+				readings:append(tonumber(resp[1]))
 			end
 		end)
 	end
@@ -75,6 +75,7 @@ function updateAverageTemperature()
 	if readingCount == 0 then return -1 end
 
 	averageTemp = readings:sum()/readingCount
+	print("New Avg Temp: " .. averageTemp)
 end
 
 function setHeater(state)

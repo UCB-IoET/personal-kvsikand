@@ -130,7 +130,7 @@ end
 
 function Node:addNeighbor(announcementTable, ipaddr)
 	--local timeDelta = storm.os.now(storm.os.SHIFT_16) - announcementTable.t
-	if not announcementTable or not announcementTable[id] then -- not a valid announcement
+	if not announcementTable or not announcementTable.id then -- not a valid announcement
 		return
 	end
 	for k,v in pairs(announcementTable) do
