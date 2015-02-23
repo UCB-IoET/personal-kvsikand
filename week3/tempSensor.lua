@@ -16,7 +16,6 @@ end
 
 function TEMP:init()
     --configure the conversion rate (0x02 0x00 = 2 sample/second, 0x04 0x00 = 1 s/s)
-    print(storm.n.TMP006_CONFIG .. "\n")
     self.reg:w(storm.n.TMP006_CONFIG, {0x00 + 0x70 + 0x01, 0x00})
     return true
 end

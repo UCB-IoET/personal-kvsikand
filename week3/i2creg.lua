@@ -19,7 +19,6 @@ function REG:r(reg, num)
     -- write address
     -- read register with RSTART
     -- check all return values
-    print("WRITE: " .. reg .. " and " .. num)
     num = num or 1
     local arr = storm.array.create(1, storm.array.UINT8)
     arr:set(1, reg)
