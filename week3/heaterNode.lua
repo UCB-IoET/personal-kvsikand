@@ -68,6 +68,8 @@ function updateAverageTemperature()
 			resp = node:invokeNeighborService("getTemperature", ip)
 			if not Node.isError(resp) then
 				readings:append(tonumber(resp[1]))
+			else 
+				readingCount = readingCount-1
 			end
 		end)
 	end
