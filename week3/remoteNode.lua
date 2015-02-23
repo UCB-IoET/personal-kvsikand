@@ -52,8 +52,7 @@ btn3 = Button:new("D3")
 btn1:whenever("RISING", function() incrementTargetTemp(1) end);
 btn3:whenever("RISING", function() incrementTargetTemp(-1) end);
 
-node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
 -- enable a shell
-sh = require "stormsh"
-sh.start()
+
+initTempSensor()
 cord.enter_loop() -- start event/sleep loop
