@@ -65,6 +65,7 @@ end
 
 --local Stuff
 function Node:invokeLocalService(name, ...)
+	local args = {...}
 	return self._localServicesToFunctions[name](args)
 end
 
@@ -102,10 +103,6 @@ function Node:invokeNeighborService(name, ip, ...)
 	storm.net.close(invSock)
 	print("invokation timeout")
 	return nil
-end
-
-function Node:isError(v)
-   return v == nil
 end
 
 function Node:getRemoteServiceNames()
@@ -170,7 +167,8 @@ function getnow()
 end
 
 function Node.isError(response)
-	return response == {"Service Error"};
+
+	return response == nil or (type(response) == "table" and response == {"Service Error"});
 end
 
 return Node

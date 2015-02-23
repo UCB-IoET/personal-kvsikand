@@ -16,8 +16,8 @@ local heaterIsOn = false
 local averageTemp = -1
 local TEMP_DELTA = 1
 local tempInited = false
-local targetTemp = nil
-local tempMonitorHandle = nil
+local targetTemp = -1
+local shouldMonitorTemp = false
 
 storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
@@ -53,7 +53,7 @@ function updateAverageTemperature()
 			node:invokeLocalService("initTempSensor");
 		end
 		local tempLocalTemp = node:invokeLocalService("getTemperature");
-		if not node:isError(temp) then
+		if not Node.isError(temp) then
 			readingCount = readingCount + 1
 			localTemp = tempLocalTemp
 		end
@@ -66,7 +66,7 @@ function updateAverageTemperature()
 	for _,ip in pairs(neighbors) do
 		cord.new( function ()
 			resp = node:invokeNeighborService("getTemperature", ip)
-			if(not Node.isError(resp)) then
+			if not Node.isError(resp) then
 				readings:append(tonumber(resp))
 			end
 		end)
@@ -80,40 +80,42 @@ end
 function setHeater(state)
    if state == 1 then
 	   storm.io.set(storm.io.HIGH, heaterPin)
-	   heaterIsOn = 1
+	   heaterIsOn = true
    else
    		storm.io.set(storm.io.LOW, heaterPin)
-   		heaterIsOn = 0
+   		heaterIsOn = false
    end
 end
 
 function monitorTemperature()
-	updateAverageTemperature()
-	print("temperature: " .. currentTemp)
-	if(targetTemp and averageTemp + TEMP_DELTA < targetTemp) then
-		if heaterIsOn == false then
-			print("turning on heater")
-			setHeater(1)
+	while shouldMonitorTemp do
+		updateAverageTemperature()
+		if(targetTemp and averageTemp + TEMP_DELTA < targetTemp) then
+			if heaterIsOn == false then
+				print("turning on heater")
+				setHeater(1)
+			end
+		elseif heaterIsOn == true then
+			print("turning off heater")
+			setHeater(0)
 		end
-	elseif heaterIsOn == true then
-		print("turning off heater")
-		setHeater(0)
+		cord.await(storm.os.invokeLater, 10*storm.os.SECOND)
 	end
 end
 
 
-function setTargetTemp(t)
-	targetTemp = t
-	if not tempMonitorHandle then
+function setTargetTemp(args)
+	targetTemp = args[1]
+	if not shouldMonitorTemp then
 		print("starting monitor")
-		tempMonitorHandle = storm.os.invokePeriodically(10*storm.os.SECOND, monitorTemperature)
+		shouldMonitorTemp = true
+		cord.new(function() monitorTemperature() end)
 	end
 end
 
 function stopMonitoringTemp()
-	if(tempMonitorHandle) then
-		storm.os.cancel(tempMonitorHandle)
-		tempMonitorHandle = nil
+	if(shouldMonitorTemp) then
+		shouldMonitorTemp = false
 	end
 	return true
 end
