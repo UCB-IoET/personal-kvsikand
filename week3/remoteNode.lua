@@ -9,16 +9,21 @@ require "cord" -- scheduler / fiber library
 require "table"
 --require "math"
 
+temp = nil
+
 node = Node:new("HeaterRemote")
 
 local tempInited = false
 
 function initTempSensor()
-	temp = Temp:new()
-	cord.new(function() 
-		tempInited = temp:init()
-		node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
-	end)
+	if not tempInited then
+		print("Initializing Temperature Sensor")
+		temp = Temp:new()
+		cord.new(function() 
+			tempInited = temp:init()
+			node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
+		end)
+	end
 end
 
 function getTemperature()
@@ -28,19 +33,19 @@ function getTemperature()
 end
 
 function setRoomTemperature(t)
-	local neighbors = node:getNeighborsForService("getTemperature")
+	local neighbors = node:getNeighborsForService("setRoomTemperature")
 	cord.new(function()
 		for _,ip in pairs(neighbors) do
-			resp = node:invokeNeighborService("setRoomTemperature",ip,t)
+			node:invokeNeighborService("setRoomTemperature",ip,t)
 		end
 	end)
 end
 
 function cancelRoomTemperature()
-	local neighbors = node:getNeighborsForService("setRoomTemperature")
+	local neighbors = node:getNeighborsForService("cancelRoomTemperature")
 	cord.new(function()
 		for _,ip in pairs(neighbors) do
-			resp = node:invokeNeighborService("cancelRoomTemperature",ip)
+			node:invokeNeighborService("cancelRoomTemperature",ip)
 		end
 	end)
 end
@@ -64,6 +69,9 @@ end--]]
 node:addService("initTempSensor","getBool","initialize temp sensor", initTempSensor)
 
 -- enable a shell
+
+initTempSensor()
+
 sh = require "stormsh"
 sh.start()
 cord.enter_loop() -- start event/sleep loop

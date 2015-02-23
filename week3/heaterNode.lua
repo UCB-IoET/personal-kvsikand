@@ -23,11 +23,14 @@ storm.io.set_mode(storm.io.OUTPUT, heaterPin)
 storm.io.set(storm.io.LOW, heaterPin)
 
 function initTempSensor()
-	temp = Temp:new()
-	cord.new(function() 
-		tempInited = temp:init()
-		node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
-	end)
+	if not tempInited then
+		print("Initializing Temperature Sensor")
+		temp = Temp:new()
+		cord.new(function() 
+			tempInited = temp:init()
+			node:addService("getTemperature","getNumber","get temperature from sensor", getTemperature)
+		end)
+	end
 end
 
 function getTemperature()
