@@ -12,7 +12,7 @@ function Node:new(node_id, announcePort, invokePort, beaconingRate)
 	local obj = { announcePort = announcePort or 1525,
 			invokePort = invokePort or 1526,
 			beaconingRate = beaconingRate or 1000,
-			_serviceTable = {id=node_id or "A Really Cool Node"},
+			_serviceTable = {id=node_id or "AReallyCoolNode"},
 			_localServicesToFunctions = {},
 			_remoteServiceTable = {},
 	        _scheduledInvocations = {}}
@@ -53,7 +53,7 @@ cord.new(function()
 	    local cmd = storm.mp.unpack(payload)
 
 	    if(cmd[1] and self._localServicesToFunctions[cmd[1]]) then
-	       local value = self.invokeLocalService(cmd[1],unpack(cmd[2]))
+	       local value = self:invokeLocalService(cmd[1],unpack(cmd[2]))
 	       storm.net.sendto(self.invokeSocket, storm.mp.pack({value}), from, port)
 	    else
 	       print (string.format("Error: invoke from %s port %d: %s cmd:%s",from,port,payload, cmd[1]))

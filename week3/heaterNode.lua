@@ -9,7 +9,7 @@ require "cord" -- scheduler / fiber library
 require "table"
 --require "math"
 
-node = Node:new("Heater interfaced device")
+node = Node:new("HeaterInterfacedDevice")
 
 local heaterPin = storm.io.D4
 local heaterIsOn = false
