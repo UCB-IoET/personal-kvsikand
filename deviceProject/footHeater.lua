@@ -1,38 +1,40 @@
 require "cord"
 sh = require("stormsh")
 TEMP = require("temp")
-local contactPin1 = storm.io.D2
-local contactPin2 = storm.io.D3
+local contactPinOut = storm.io.D2
+local contactPinIn = storm.io.D3
+local relayPin = storm.io.D8
 local targetTemp = 24
-local temp = TEMP:new()
-temp:init()
-
-storm.os.invokePeriodically(2*storm.os.SECOND, function()
-	if(temp:getTemp() > targetTemp) then
-		setHeater(0)
-	end
+cord.new(function()
+	temp = TEMP:new()
+	temp:init() 
 end)
 
-function getContact()
-	return (storm.io.get(contactPin2) == 0)
+function updateHeaterState()
+	cord.new( function()
+		local contacted = getContact()
+		print("updating heater state:")
+		print(contacted)
+		--logic
+		if(contacted and temp:getTemp() < targetTemp) then
+			setHeater(1)
+		else
+			setHeater(0)
+		end
+	end)
 end
 
-function contactChanged()
-	local contacted = getContact()
-	--logic
-	if(contacted and temp:getTemp() < targetTemp) then
-		setHeater(1)
-	elseif not contacted
-		setHeater(0)
-	end
+function getContact()
+	return (storm.io.get(contactPinIn) == storm.io.HIGH)
 end
 
 function initContactSensor()
-	storm.io.set_mode(storm.io.OUTPUT, contactPin1)
-	storm.io.set_mode(storm.io.INPUT, contactPin2)
-	storm.io.set_pull(storm.io.INPUT, contactPin2)
-	storm.io.set(1,contactPin1)
-	storm.io.watch_all(storm.io.CHANGE, contactPin2, contactChanged)
+	storm.io.set_mode(storm.io.OUTPUT, contactPinOut)
+	storm.io.set_mode(storm.io.INPUT, contactPinIn)
+	storm.io.set_pull(storm.io.PULL_DOWN, contactPinIn)
+	storm.io.set(storm.io.HIGH,contactPinOut)
+	storm.io.watch_all(storm.io.CHANGE, contactPinIn, updateHeaterState)
+	storm.os.invokePeriodically(3*storm.os.SECOND, updateHeaterState)
 end
 
 function setTargetTemperature(target)
@@ -40,9 +42,15 @@ function setTargetTemperature(target)
 end
 
 function setHeater(state)
-	--turn heater on and off (HOW??)
+	--turn heater on and off
+	if(state == 1) then
+	  storm.io.set(storm.io.HIGH, relayPin)
+	else
+	  storm.io.set(storm.io.LOW, relayPin)
+	end
 end
 
+storm.io.set_mode(storm.io.OUTPUT, relayPin)
 
 sh.start()
 cord.enter_loop()
