@@ -1,6 +1,7 @@
 require "cord"
 sh = require("stormsh")
 TEMP = require("temp")
+require"svcd"
 local contactPinOut = storm.io.D2
 local contactPinIn = storm.io.D3
 local relayPin = storm.io.D8
