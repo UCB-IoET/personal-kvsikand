@@ -52,5 +52,7 @@ end
 
 storm.io.set_mode(storm.io.OUTPUT, relayPin)
 
+storm.n.svcd_init("footHeater", function () print("Looking for services") end)
+
 sh.start()
 cord.enter_loop()
