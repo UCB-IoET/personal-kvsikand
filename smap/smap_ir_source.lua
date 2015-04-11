@@ -3,10 +3,12 @@ require "cord"
 TEMP = require "temp"
 temp = TEMP:new()
 
-middleware_ip = "2001:470:66:b0::2"
-udp_port = "1263"
+--middleware_ip = "2001:470:66:b0::2"
+middleware_ip = "2001:470:1f04:5f2::2"
+udp_port = 1263
 
-sendsock = storm.net.udpsocket(1337, function() end)
+--1337
+sendsock = storm.net.udpsocket(udp_port, function() print("something") end)
 
 cord.new(function ()
 	    temp:init()
